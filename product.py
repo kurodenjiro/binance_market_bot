@@ -9,21 +9,12 @@ from settings import headers
 
 class Product:
 
-    def __init__(self, product_id: str = '', amount: str = ''):
+    def __init__(self, product_id: str, amount: str):
         self.url_nft_list = 'https://www.binance.com/bapi/nft/v1/friendly/nft/artist-product-list'
         self.url_create_order = 'https://www.binance.com/bapi/nft/v1/private/nft/nft-trade/order-create'
         self.url_product_detail = 'https://www.binance.com/bapi/nft/v1/friendly/nft/nft-trade/product-detail'
-        self.list_product_ids = self.set_list_products()
-        self.product_id = random.choice(self.list_product_ids)
+        self.product_id = product_id
         self.amount = amount
-
-    def set_list_products(self):
-        list_products = self.get_list_products()['data']['rows']
-        list_product_ids = list()
-        for i in range(len(list_products)):
-            list_product_ids.append(list_products[i]['productId'])
-
-        return list_product_ids
 
     def get_list_products(self):
         response = requests.post(
@@ -58,8 +49,8 @@ class Product:
 
         return start_sale_time
 
-    def buy_product(self, proxy: str) -> None:
-        headers['x-nft-checkbot-token'] = resolve_captcha(self.product_id)
+    def buy_product(self, proxy: str, captcha: str) -> None:
+        headers['x-nft-checkbot-token'] = captcha
         body: dict = {
             'productId': self.product_id,
             'amount': self.amount,
