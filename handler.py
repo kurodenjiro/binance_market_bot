@@ -6,11 +6,8 @@ from datetime import datetime, timedelta
 import requests
 
 from product import Product
-from recaptcha import resolve_captcha
-
-
-COUNT_REQUESTS = 50
-captcha_results = list()
+from recaptcha import Recaptcha
+from settings import COUNT_REQUESTS
 
 
 def headers_is_right(headers: dict) -> None:
@@ -24,28 +21,9 @@ def headers_is_right(headers: dict) -> None:
         print('Check please: COOKIE, CSRFTOKEN, headers')
         sys.exit(1)
 
-def wrapped_captcha(captcha_results):
-    captcha = resolve_captcha()
-    captcha_results.append(captcha)
-
-def prepare_captcha():
-    threads = [None] * COUNT_REQUESTS
-
-    for i in range(len(threads)):
-        threads[i] = threading.Thread(
-            target=wrapped_captcha,
-            args=(captcha_results, ),
-        )
-        threads[i].start()
-
-    for i in range(len(threads)):
-        threads[i].join()
-
-    return captcha_results
-
-# ToDo: TOTAL refactoring
-def send_buy_requests() -> None:
-    product = Product()
+def send_buy_requests(product_id: str, amount: str) -> None:
+    product = Product(product_id, amount)
+    captcha = Recaptcha()
     start_sale_time = product.get_start_time()
     threads = list()
 
@@ -53,24 +31,17 @@ def send_buy_requests() -> None:
         current_time = datetime.today()
         if start_sale_time <= (current_time + timedelta(seconds=30)):
             print('Prepare captcha')
-            captcha_list = prepare_captcha()
+            captcha_list = captcha.prepare_captcha(product_id)
             print('Prepare completed')
             break
 
     while True:
         current_time = datetime.today()
-        if start_sale_time <= (current_time + timedelta(seconds=1)):
+        if start_sale_time <= (current_time + timedelta(seconds=3)):
             print('Start sale')
-            counter = 0
-            new_product = Product(amount=50)
-
             for _ in range(0, COUNT_REQUESTS):
-                counter += 1
-                if counter % 3 == 0:
-                    new_product = Product(amount=50)
-
                 request = threading.Thread(
-                    target=new_product.buy_product,
+                    target=product.buy_product,
                     args=(captcha_list.pop(), )
                 )
 
