@@ -1,3 +1,5 @@
+COUNT_REQUESTS = 50
+
 # Give it here - https://2captcha.com/enterpage
 CAPTCHA_API_KEY = ''
 
@@ -12,7 +14,7 @@ COOKIE = ''
 headers = {
     "accept": "*/*",
     "accept-language": "en-US,en;q=0.9,ru;q=0.8",
-    "bnc-uuid": "dc36fccf-9f08-4dc1-a13a-bd062d29f72e",
+    "bnc-uuid": "",
     "clienttype": "web",
     "content-type": "application/json",
     "cookie": COOKIE.encode("UTF-8"),
