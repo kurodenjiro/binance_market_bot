@@ -38,11 +38,10 @@ class Product:
                 "orderBy": "amount_sort",
                 "orderType": 1,
                 "page": 1,
-                "rows": 50,
+                "rows": 200,
                 "creatorId": "238153642"
             })
         )
-        assert response.json()['success'] != False, 'Verification failed'
         return response.json()
 
     def get_info_nft(self) -> dict:
