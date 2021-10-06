@@ -7,10 +7,9 @@ import requests
 
 from product import Product
 from recaptcha import resolve_captcha
-from settings import PROXY
 
 
-COUNT_REQUESTS = 5
+COUNT_REQUESTS = 50
 captcha_results = list()
 
 
@@ -25,17 +24,17 @@ def headers_is_right(headers: dict) -> None:
         print('Check please: COOKIE, CSRFTOKEN, headers')
         sys.exit(1)
 
-def wrapped_captcha(product_id, captcha_results):
-    captcha = resolve_captcha(product_id)
+def wrapped_captcha(captcha_results):
+    captcha = resolve_captcha()
     captcha_results.append(captcha)
 
-def prepare_captcha(product_id):
+def prepare_captcha():
     threads = [None] * COUNT_REQUESTS
 
     for i in range(len(threads)):
         threads[i] = threading.Thread(
             target=wrapped_captcha,
-            args=(product_id, captcha_results),
+            args=(captcha_results, ),
         )
         threads[i].start()
 
@@ -44,25 +43,40 @@ def prepare_captcha(product_id):
 
     return captcha_results
 
-# ToDo: refactoring
-def send_buy_requests(product_id: str, amount: str) -> None:
-    product = Product(product_id=product_id,amount=amount)
+# ToDo: TOTAL refactoring
+def send_buy_requests() -> None:
+    product = Product()
     start_sale_time = product.get_start_time()
-    captcha_list = prepare_captcha(product_id)
     threads = list()
 
     while True:
         current_time = datetime.today()
-        if start_sale_time <= (current_time + timedelta(seconds=0.2)):
+        if start_sale_time <= (current_time + timedelta(seconds=30)):
+            print('Prepare captcha')
+            captcha_list = prepare_captcha()
+            print('Prepare completed')
+            break
+
+    while True:
+        current_time = datetime.today()
+        if start_sale_time <= (current_time + timedelta(seconds=1)):
             print('Start sale')
+            counter = 0
+            new_product = Product(amount=50)
+
             for _ in range(0, COUNT_REQUESTS):
+                counter += 1
+                if counter % 3 == 0:
+                    new_product = Product(amount=50)
+
                 request = threading.Thread(
-                    target=product.buy_product,
-                    args=(PROXY, captcha_list.pop())
+                    target=new_product.buy_product,
+                    args=(captcha_list.pop(), )
                 )
+
                 request.start()
                 threads.append(request)
-                time.sleep(0.15)
+                time.sleep(0.14)
 
             for thread in threads:
                 thread.join()
