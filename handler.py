@@ -29,7 +29,7 @@ def send_buy_requests(product_id: str, amount: str) -> None:
 
     while True:
         current_time = datetime.today()
-        if start_sale_time <= (current_time + timedelta(seconds=30)):
+        if start_sale_time <= (current_time + timedelta(seconds=120)):
             print('Prepare captcha')
             captcha_list = captcha.prepare_captcha()
             print('Prepare completed')
@@ -37,7 +37,7 @@ def send_buy_requests(product_id: str, amount: str) -> None:
 
     while True:
         current_time = datetime.today()
-        if start_sale_time <= (current_time + timedelta(seconds=2)):
+        if start_sale_time <= (current_time + timedelta(seconds=3)):
             print('Start sale')
             for _ in range(0, COUNT_REQUESTS):
                 request = threading.Thread(
